@@ -41,6 +41,27 @@ var generateRandomToken = function(callback) {
 var generateRandomTokenAsync = Promise.promisify(generateRandomToken); // TODO
 
 
+//PROMISIFY BY CORRECTING CALLBACK FUNCTION SIGNATURE TO CORRECT NODE CONVENTION
+//------------------------------------------------------------------------------
+// // (3) Asyncronous file manipulation
+// var readFileAndMakeItFunny = function(filePath, callback) {
+//   fs.readFile(filePath, 'utf8', function(err, file) {
+//     if (err) { return callback(err); }
+   
+//     var funnyFile = file.split('\n')
+//       .map(function(line) {
+//         return line + ' lol';
+//       })
+//       .join('\n');
+
+//     callback(null, funnyFile); //NOTE: changing to 'callback(null, funnyFile)' implements current Node callback function signature - promisify works
+//   });
+// };
+
+// var readFileAndMakeItFunnyAsync = Promise.promisify(readFileAndMakeItFunny); // TODO
+
+//WRITE NEW PROMISE FUNCTION WITHOUT CORRECTING FLAWED NODE CALLBACK IMPLEMENTATION
+//------------------------------------------------------------------------------
 // (3) Asyncronous file manipulation
 var readFileAndMakeItFunny = function(filePath, callback) {
   fs.readFile(filePath, 'utf8', function(err, file) {
@@ -52,11 +73,30 @@ var readFileAndMakeItFunny = function(filePath, callback) {
       })
       .join('\n');
 
-    callback(funnyFile);
+    callback(funnyFile); //NOTE: changing to 'callback(null, funnyFile)' implements current Node callback function signature - promisify works
   });
 };
 
-var readFileAndMakeItFunnyAsync = Promise.promisify(readFileAndMakeItFunny); // TODO
+var readFileAndMakeItFunnyAsync = function(filePath) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(filePath, 'utf8', function(err, file) {
+
+      if (err) { 
+        reject(err);
+      } else {
+     
+        var funnyFile = file.split('\n')
+          .map(function(line) {
+            return line + ' lol';
+          })
+          .join('\n');
+
+        resolve(funnyFile);
+      }
+    });
+  });
+};
+
 
 // Export these functions so we can test them and reuse them in later exercises
 module.exports = {
